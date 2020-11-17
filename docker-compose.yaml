@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  php-fpm:
+    restart: always
+    image: php:fpm-alpine
+    volumes:
+      - ./src:/var/www
+  nginx:
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2380:2380"
+    image: nginx:latest
+    volumes:
+      - ./src:/var/www
+      - ./src/proxypage:/var/www/proxypage
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/sites/:/etc/nginx/sites-available
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - php-fpm
+  mysqldb:
+    image: mysql:8.0.22
+    restart: always
+    environment:
+      - MYSQL_DATABASE=test
+      - MYSQL_ROOT_USER=root
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=dev
+      - MYSQL_PASSWORD=dev
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - "./var/lib/mysql:/var/lib/mysql"
